@@ -53,108 +53,144 @@
   </div>
 
   <script>
-    const APP_URL = "https://script.google.com/a/macros/feuerwehr-stpoelten.at/s/AKfycbycKW54MsrXZAgrM4h4dqOnbcbuyw-icOU2WT94aS7a0TOf6Y-nkUfhpDrE3UHxThKR/exec";
-    const GLOBAL_STATUS_URL = "https://michaelmejtsky.github.io/FFSTP-Status/status.json";
+  const APP_URL = "https://script.google.com/a/macros/feuerwehr-stpoelten.at/s/AKfycbycKW54MsrXZAgrM4h4dqOnbcbuyw-icOU2WT94aS7a0TOf6Y-nkUfhpDrE3UHxThKR/exec";
+  const GLOBAL_STATUS_URL = "https://michaelmejtsky.github.io/FFSTP-Status/status.json";
 
-    const frame = document.getElementById("infoscreenFrame");
-    const offline = document.getElementById("offlineFallback");
-    const last = document.getElementById("lastConnection");
-    const debugPanel = document.getElementById("debugPanel");
+  const frame = document.getElementById("infoscreenFrame");
+  const offline = document.getElementById("offlineFallback");
+  const last = document.getElementById("lastConnection");
+  const debugPanel = document.getElementById("debugPanel");
 
-    let offlineTest = false;
-    let globalFallbackActive = false;
-    let lastSuccess = new Date();
+  let offlineTest = false;
+  let globalFallbackActive = false;
+  let lastSuccess = new Date();
 
-    function formatDateTime(date) {
-      return date.toLocaleString("de-AT", {
-        day:"2-digit", month:"2-digit", year:"numeric",
-        hour:"2-digit", minute:"2-digit", second:"2-digit"
-      }) + " Uhr";
+  function formatDateTime(date) {
+    return date.toLocaleString("de-AT", {
+      day:"2-digit",
+      month:"2-digit",
+      year:"numeric",
+      hour:"2-digit",
+      minute:"2-digit",
+      second:"2-digit"
+    }) + " Uhr";
+  }
+
+  function updateTime() {
+    last.innerHTML =
+      "Letzte erfolgreiche Verbindung:<br>" +
+      formatDateTime(lastSuccess);
+  }
+
+  function showOffline() {
+    offline.style.display = "flex";
+    updateTime();
+  }
+
+  function hideOffline() {
+    if (offlineTest || globalFallbackActive) return;
+
+    offline.style.display = "none";
+    lastSuccess = new Date();
+    updateTime();
+  }
+
+  function reloadFrame() {
+    if (offlineTest || globalFallbackActive) return;
+
+    frame.src = APP_URL + "?reload=" + Date.now();
+  }
+
+  function showOfflineTest() {
+    offlineTest = true;
+    showOffline();
+  }
+
+  function endOfflineTest() {
+    offlineTest = false;
+    globalFallbackActive = false;
+    hideOffline();
+    reloadFrame();
+  }
+
+  async function checkGlobalFallbackStatus() {
+    try {
+      const response = await fetch(GLOBAL_STATUS_URL + "?t=" + Date.now(), {
+        cache: "no-store"
+      });
+
+      const text = await response.text();
+      console.log("STATUS.JSON:", text);
+
+      let status = {};
+
+      try {
+        status = JSON.parse(text);
+      } catch (e) {
+        console.log("status.json konnte nicht als JSON gelesen werden");
+        return;
+      }
+
+      if (status.fallback === true || status.fallback === "true") {
+        globalFallbackActive = true;
+        showOffline();
+      } else {
+        globalFallbackActive = false;
+
+        if (!offlineTest && navigator.onLine) {
+          hideOffline();
+        }
+      }
+
+    } catch (err) {
+      console.log("Globaler Status konnte nicht geprüft werden:", err);
     }
+  }
 
-    function updateTime() {
-      last.innerHTML = "Letzte erfolgreiche Verbindung:<br>" + formatDateTime(lastSuccess);
-    }
+  frame.addEventListener("load", function () {
+    setTimeout(hideOffline, 1200);
+  });
 
-    function showOffline() {
-      offline.style.display = "flex";
-      updateTime();
-    }
+  window.addEventListener("offline", showOffline);
 
-    function hideOffline() {
-      if (offlineTest || globalFallbackActive) return;
-      offline.style.display = "none";
-      lastSuccess = new Date();
-      updateTime();
-    }
+  window.addEventListener("online", function () {
+    reloadFrame();
+    setTimeout(hideOffline, 2500);
+  });
 
-    function reloadFrame() {
-      if (offlineTest || globalFallbackActive) return;
-      frame.src = APP_URL + "?reload=" + Date.now();
-    }
-
-    function showOfflineTest() {
-      offlineTest = true;
+  setInterval(function () {
+    if (!navigator.onLine) {
       showOffline();
     }
+  }, 4000);
 
-    function endOfflineTest() {
-      offlineTest = false;
-      globalFallbackActive = false;
-      hideOffline();
+  setInterval(function () {
+    if (!offlineTest && !globalFallbackActive && navigator.onLine) {
       reloadFrame();
     }
+  }, 60000);
 
-    async function checkGlobalFallbackStatus() {
-      try {
-        const response = await fetch(GLOBAL_STATUS_URL + "?t=" + Date.now(), { cache:"no-store" });
-        const status = await response.json();
+  setInterval(checkGlobalFallbackStatus, 3000);
 
-        if (status.fallback === true) {
-          globalFallbackActive = true;
-          showOffline();
-        } else {
-          globalFallbackActive = false;
-          if (!offlineTest && navigator.onLine) hideOffline();
-        }
-      } catch (err) {
-        console.log("Globaler Status konnte nicht geprüft werden:", err);
-      }
-    }
+  const params = new URLSearchParams(window.location.search);
 
-    frame.addEventListener("load", function () {
-      setTimeout(hideOffline, 1200);
-    });
+  if (
+    params.has("offline") ||
+    params.has("testoffline") ||
+    params.get("test") === "offline"
+  ) {
+    showOfflineTest();
+  }
 
-    window.addEventListener("offline", showOffline);
+  if (
+    params.has("debug") ||
+    params.get("debug") === "1"
+  ) {
+    debugPanel.style.display = "flex";
+  }
 
-    window.addEventListener("online", function () {
-      reloadFrame();
-      setTimeout(hideOffline, 2500);
-    });
-
-    setInterval(function () {
-      if (!navigator.onLine) showOffline();
-    }, 4000);
-
-    setInterval(function () {
-      if (!offlineTest && !globalFallbackActive && navigator.onLine) reloadFrame();
-    }, 60000);
-
-    setInterval(checkGlobalFallbackStatus, 3000);
-
-    const params = new URLSearchParams(window.location.search);
-
-    if (params.has("offline") || params.has("testoffline") || params.get("test") === "offline") {
-      showOfflineTest();
-    }
-
-    if (params.has("debug") || params.get("debug") === "1") {
-      debugPanel.style.display = "flex";
-    }
-
-    updateTime();
-    checkGlobalFallbackStatus();
-  </script>
+  updateTime();
+  checkGlobalFallbackStatus();
+</script>
 </body>
 </html>
