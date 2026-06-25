@@ -24,6 +24,7 @@
       border:none;
       display:block;
       background:#000;
+      z-index:1;
     }
 
     #offlineFallback {
@@ -135,31 +136,15 @@
 
   <div id="offlineFallback">
     <div class="offlineCard">
-      <img
-        class="logo"
+      <img class="logo"
         src="https://drive.google.com/thumbnail?id=11OnUfELMcLBj_VPiqKXqu1nIAZHXg_Pb&sz=w400"
         alt="Feuerwehr St. Pölten Stadt">
 
-      <div class="title">
-        Derzeit gibt es<br>
-        Verbindungsschwierigkeiten.
-      </div>
-
-      <div class="subtitle">
-        Wir arbeiten bereits an der Problembehebung.
-      </div>
-
-      <div class="info">
-        Die Anzeige wird automatisch wiederhergestellt,<br>
-        sobald die Verbindung verfügbar ist.
-      </div>
-
+      <div class="title">Derzeit gibt es<br>Verbindungsschwierigkeiten.</div>
+      <div class="subtitle">Wir arbeiten bereits an der Problembehebung.</div>
+      <div class="info">Die Anzeige wird automatisch wiederhergestellt,<br>sobald die Verbindung verfügbar ist.</div>
       <div class="spinner"></div>
-
-      <div class="last" id="lastConnection">
-        Letzte erfolgreiche Verbindung:<br>
-        wird ermittelt …
-      </div>
+      <div class="last" id="lastConnection">Letzte erfolgreiche Verbindung:<br>wird ermittelt …</div>
     </div>
   </div>
 
@@ -201,18 +186,23 @@
 
     function showOffline() {
       offline.style.display = "flex";
+      frame.style.display = "none";
       updateTime();
     }
 
     function hideOffline() {
       if (offlineTest || globalFallbackActive) return;
+
       offline.style.display = "none";
+      frame.style.display = "block";
       lastSuccess = new Date();
       updateTime();
     }
 
     function reloadFrame() {
       if (offlineTest || globalFallbackActive) return;
+
+      frame.style.display = "block";
       frame.src = APP_URL + "?reload=" + Date.now();
     }
 
@@ -224,7 +214,10 @@
     function endOfflineTest() {
       offlineTest = false;
       globalFallbackActive = false;
-      hideOffline();
+      offline.style.display = "none";
+      frame.style.display = "block";
+      lastSuccess = new Date();
+      updateTime();
       reloadFrame();
     }
 
@@ -239,12 +232,6 @@
         const text = await response.text();
         const lower = text.toLowerCase();
 
-        if (lower.includes('"fallback"') && lower.includes("true")) {
-          globalFallbackActive = true;
-          showOffline();
-          return;
-        }
-
         if (lower.includes("fallback") && lower.includes("true")) {
           globalFallbackActive = true;
           showOffline();
@@ -254,7 +241,10 @@
         globalFallbackActive = false;
 
         if (!offlineTest && navigator.onLine) {
-          hideOffline();
+          offline.style.display = "none";
+          frame.style.display = "block";
+          lastSuccess = new Date();
+          updateTime();
         }
 
       } catch (err) {
@@ -266,7 +256,9 @@
       setTimeout(hideOffline, 1200);
     });
 
-    window.addEventListener("offline", showOffline);
+    window.addEventListener("offline", function () {
+      showOffline();
+    });
 
     window.addEventListener("online", function () {
       reloadFrame();
