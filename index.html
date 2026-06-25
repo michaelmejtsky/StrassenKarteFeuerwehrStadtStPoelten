@@ -1,299 +1,279 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Straßenkarte Feuerwehr St. Pölten</title>
 
-<title>Infoscreen</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+    }
 
-<style>
+    iframe {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #000;
+    }
 
-html,body{
-margin:0;
-padding:0;
-width:100%;
-height:100%;
-overflow:hidden;
-background:#000;
-font-family:Arial,Helvetica,sans-serif;
-}
+    #offlineFallback {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: radial-gradient(circle at center, #10235a 0%, #07152f 55%, #020816 100%);
+      color: #ffffff;
+    }
 
-iframe{
-position:absolute;
-inset:0;
-width:100%;
-height:100%;
-border:none;
-display:block;
-background:#000;
-}
+    .offlineCard {
+      width: 760px;
+      max-width: 82vw;
+      padding: 55px;
+      border-radius: 22px;
+      background: rgba(5, 17, 45, 0.84);
+      border: 2px solid rgba(0, 234, 255, 0.45);
+      box-shadow:
+        0 0 30px rgba(0, 234, 255, 0.25),
+        0 0 90px rgba(0, 234, 255, 0.15);
+    }
 
-#offlineFallback{
-position:fixed;
-inset:0;
-display:none;
-justify-content:center;
-align-items:center;
-background:radial-gradient(circle at center,#10235a 0%,#07152f 55%,#020816 100%);
-z-index:999999;
-}
+    .logo {
+      width: 105px;
+      height: 105px;
+      object-fit: contain;
+      margin-bottom: 28px;
+      filter: drop-shadow(0 0 15px rgba(0, 234, 255, 0.45));
+    }
 
-.offlineCard{
+    .title {
+      font-size: 37px;
+      line-height: 1.25;
+      font-weight: 900;
+      color: #00eaff;
+      margin-bottom: 18px;
+    }
 
-width:760px;
-max-width:80vw;
+    .subtitle {
+      font-size: 27px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 22px;
+    }
 
-padding:55px;
+    .info {
+      font-size: 18px;
+      line-height: 1.45;
+      color: #d9faff;
+      opacity: 0.92;
+      margin-bottom: 30px;
+    }
 
-border-radius:22px;
+    .spinner {
+      margin: 0 auto;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 5px solid rgba(255, 255, 255, 0.25);
+      border-top: 5px solid #00eaff;
+      animation: spin 1s linear infinite;
+    }
 
-background:rgba(5,17,45,.82);
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
 
-border:2px solid rgba(0,234,255,.45);
+    .last {
+      margin-top: 26px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #cfefff;
+      opacity: 0.8;
+    }
 
-box-shadow:
-0 0 30px rgba(0,234,255,.25),
-0 0 90px rgba(0,234,255,.15);
+    #debugPanel {
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 1000000;
+      display: none;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.55);
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 234, 255, 0.4);
+    }
 
-text-align:center;
-
-color:white;
-
-}
-
-.logo{
-
-width:105px;
-margin-bottom:28px;
-
-filter:drop-shadow(0 0 15px rgba(0,234,255,.45));
-
-}
-
-.title{
-
-font-size:37px;
-font-weight:800;
-color:#00eaff;
-margin-bottom:18px;
-
-}
-
-.subtitle{
-
-font-size:27px;
-font-weight:700;
-margin-bottom:22px;
-
-}
-
-.info{
-
-font-size:18px;
-opacity:.9;
-
-margin-bottom:30px;
-
-}
-
-.spinner{
-
-margin:auto;
-
-width:42px;
-height:42px;
-
-border-radius:50%;
-
-border:5px solid rgba(255,255,255,.25);
-border-top:5px solid #00eaff;
-
-animation:spin 1s linear infinite;
-
-}
-
-@keyframes spin{
-
-100%{
-transform:rotate(360deg);
-}
-
-}
-
-.last{
-
-margin-top:26px;
-
-font-size:14px;
-
-opacity:.75;
-
-}
-
-</style>
-
+    #debugPanel button {
+      border: none;
+      border-radius: 9px;
+      padding: 9px 12px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #00eaff;
+      color: #06122b;
+    }
+  </style>
 </head>
 
 <body>
 
-<iframe
-id="infoscreenFrame"
-src="https://script.google.com/a/macros/feuerwehr-stpoelten.at/s/AKfycbycKW54MsrXZAgrM4h4dqOnbcbuyw-icOU2WT94aS7a0TOf6Y-nkUfhpDrE3UHxThKR/exec">
-</iframe>
-
-
-<div id="offlineFallback">
-
-<div class="offlineCard">
-
-<img
-class="logo"
-src="https://drive.google.com/thumbnail?id=11OnUfELMcLBj_VPiqKXqu1nIAZHXg_Pb&sz=w400">
-
-<div class="title">
-
-Derzeit gibt es Verbindungsschwierigkeiten.
-
-</div>
-
-<div class="subtitle">
-
-Wir arbeiten bereits an der Problembehebung.
-
-</div>
-
-<div class="info">
-
-Die Anzeige wird automatisch wiederhergestellt,
-sobald die Verbindung verfügbar ist.
-
-</div>
-
-<div class="spinner"></div>
-
-<div
-class="last"
-id="lastConnection">
-Letzte erfolgreiche Verbindung:
-wird ermittelt...
-</div>
-
-</div>
-
-</div>
-
-
-<script>
-
-const APP_URL="https://script.google.com/a/macros/feuerwehr-stpoelten.at/s/AKfycbycKW54MsrXZAgrM4h4dqOnbcbuyw-icOU2WT94aS7a0TOf6Y-nkUfhpDrE3UHxThKR/exec";
-
-const frame=document.getElementById("infoscreenFrame");
-
-const offline=document.getElementById("offlineFallback");
-
-const last=document.getElementById("lastConnection");
-
-let offlineTest=false;
-
-let lastSuccess=new Date();
-
-function updateTime(){
-
-last.innerHTML=
-"Letzte erfolgreiche Verbindung:<br>"+
-lastSuccess.toLocaleString("de-AT")+" Uhr";
-
-}
-
-updateTime();
-
-function showOffline(){
-
-offline.style.display="flex";
-
-updateTime();
-
-}
-
-function hideOffline(){
-
-if(offlineTest)return;
-
-offline.style.display="none";
-
-lastSuccess=new Date();
-
-updateTime();
-
-}
-
-frame.onload=()=>{
-
-setTimeout(hideOffline,1000);
-
-};
-
-window.addEventListener("offline",showOffline);
-
-window.addEventListener("online",()=>{
-
-frame.src=APP_URL+"?r="+Date.now();
-
-setTimeout(hideOffline,2500);
-
-});
-
-setInterval(()=>{
-
-if(!navigator.onLine){
-
-showOffline();
-
-}
-
-},4000);
-
-setInterval(()=>{
-
-if(!offlineTest&&navigator.onLine){
-
-frame.src=APP_URL+"?reload="+Date.now();
-
-}
-
-},60000);
-
-const p=new URLSearchParams(location.search);
-
-if(p.has("offline")){
-
-offlineTest=true;
-
-showOffline();
-
-}
-
-document.addEventListener("keydown",e=>{
-
-if(e.ctrlKey&&e.altKey&&e.key.toLowerCase()=="o"){
-
-offlineTest=!offlineTest;
-
-if(offlineTest){
-
-showOffline();
-
-}else{
-
-hideOffline();
-
-}
-
-}
-
-});
-
-</script>
+  <iframe
+    id="infoscreenFrame"
+    src="https://script.google.com/a/macros/feuerwehr-stpoelten.at/s/AKfycbycKW54MsrXZAgrM4h4dqOnbcbuyw-icOU2WT94aS7a0TOf6Y-nkUfhpDrE3UHxThKR/exec">
+  </iframe>
+
+  <div id="offlineFallback">
+    <div class="offlineCard">
+      <img
+        class="logo"
+        src="https://drive.google.com/thumbnail?id=11OnUfELMcLBj_VPiqKXqu1nIAZHXg_Pb&sz=w400"
+        alt="Feuerwehr St. Pölten Stadt">
+
+      <div class="title">
+        Derzeit gibt es<br>
+        Verbindungsschwierigkeiten.
+      </div>
+
+      <div class="subtitle">
+        Wir arbeiten bereits an der Problembehebung.
+      </div>
+
+      <div class="info">
+        Die Anzeige wird automatisch wiederhergestellt,<br>
+        sobald die Verbindung verfügbar ist.
+      </div>
+
+      <div class="spinner"></div>
+
+      <div class="last" id="lastConnection">
+        Letzte erfolgreiche Verbindung:<br>
+        wird ermittelt …
+      </div>
+    </div>
+  </div>
+
+  <div id="debugPanel">
+    <button onclick="showOfflineTest()">Offline testen</button>
+    <button onclick="endOfflineTest()">Zurück</button>
+    <button onclick="reloadFrame()">Neu laden</button>
+  </div>
+
+  <script>
+    const APP_URL = "https://script.google.com/a/macros/feuerwehr-stpoelten.at/s/AKfycbycKW54MsrXZAgrM4h4dqOnbcbuyw-icOU2WT94aS7a0TOf6Y-nkUfhpDrE3UHxThKR/exec";
+
+    const frame = document.getElementById("infoscreenFrame");
+    const offline = document.getElementById("offlineFallback");
+    const last = document.getElementById("lastConnection");
+    const debugPanel = document.getElementById("debugPanel");
+
+    let offlineTest = false;
+    let lastSuccess = new Date();
+
+    function formatDateTime(date) {
+      return date.toLocaleString("de-AT", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      }) + " Uhr";
+    }
+
+    function updateTime() {
+      last.innerHTML =
+        "Letzte erfolgreiche Verbindung:<br>" +
+        formatDateTime(lastSuccess);
+    }
+
+    function showOffline() {
+      offline.style.display = "flex";
+      updateTime();
+    }
+
+    function hideOffline() {
+      if (offlineTest) return;
+
+      offline.style.display = "none";
+      lastSuccess = new Date();
+      updateTime();
+    }
+
+    function reloadFrame() {
+      if (offlineTest) return;
+      frame.src = APP_URL + "?reload=" + Date.now();
+    }
+
+    function showOfflineTest() {
+      offlineTest = true;
+      showOffline();
+    }
+
+    function endOfflineTest() {
+      offlineTest = false;
+      hideOffline();
+      reloadFrame();
+    }
+
+    frame.addEventListener("load", function () {
+      setTimeout(hideOffline, 1200);
+    });
+
+    window.addEventListener("offline", function () {
+      showOffline();
+    });
+
+    window.addEventListener("online", function () {
+      reloadFrame();
+      setTimeout(hideOffline, 2500);
+    });
+
+    setInterval(function () {
+      if (!navigator.onLine) {
+        showOffline();
+      }
+    }, 4000);
+
+    setInterval(function () {
+      if (!offlineTest && navigator.onLine) {
+        reloadFrame();
+      }
+    }, 60000);
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (
+      params.has("offline") ||
+      params.has("testoffline") ||
+      params.get("test") === "offline"
+    ) {
+      showOfflineTest();
+    }
+
+    if (
+      params.has("debug") ||
+      params.get("debug") === "1"
+    ) {
+      debugPanel.style.display = "flex";
+    }
+
+    updateTime();
+  </script>
 
 </body>
 </html>
