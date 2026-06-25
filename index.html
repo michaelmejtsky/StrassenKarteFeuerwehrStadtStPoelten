@@ -7,122 +7,122 @@
 
   <style>
     html, body {
-      margin:0;
-      padding:0;
-      width:100%;
-      height:100%;
-      background:#000;
-      overflow:hidden;
-      font-family:Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
     iframe {
-      position:fixed;
-      inset:0;
-      width:100%;
-      height:100%;
-      border:none;
-      display:block;
-      background:#000;
-      z-index:1;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #000;
+      z-index: 1;
     }
 
     #offlineFallback {
-      position:fixed;
-      inset:0;
-      z-index:999999;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      background:radial-gradient(circle at center,#10235a 0%,#07152f 55%,#020816 100%);
-      color:#fff;
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: radial-gradient(circle at center, #10235a 0%, #07152f 55%, #020816 100%);
+      color: #fff;
     }
 
     .offlineCard {
-      width:760px;
-      max-width:82vw;
-      padding:55px;
-      border-radius:22px;
-      background:rgba(5,17,45,.84);
-      border:2px solid rgba(0,234,255,.45);
-      box-shadow:0 0 30px rgba(0,234,255,.25),0 0 90px rgba(0,234,255,.15);
+      width: 760px;
+      max-width: 82vw;
+      padding: 55px;
+      border-radius: 22px;
+      background: rgba(5, 17, 45, .84);
+      border: 2px solid rgba(0, 234, 255, .45);
+      box-shadow: 0 0 30px rgba(0,234,255,.25), 0 0 90px rgba(0,234,255,.15);
     }
 
     .logo {
-      width:105px;
-      height:105px;
-      object-fit:contain;
-      margin-bottom:28px;
-      filter:drop-shadow(0 0 15px rgba(0,234,255,.45));
+      width: 105px;
+      height: 105px;
+      object-fit: contain;
+      margin-bottom: 28px;
+      filter: drop-shadow(0 0 15px rgba(0,234,255,.45));
     }
 
     .title {
-      font-size:37px;
-      line-height:1.25;
-      font-weight:900;
-      color:#00eaff;
-      margin-bottom:18px;
+      font-size: 37px;
+      line-height: 1.25;
+      font-weight: 900;
+      color: #00eaff;
+      margin-bottom: 18px;
     }
 
     .subtitle {
-      font-size:27px;
-      font-weight:800;
-      color:#fff;
-      margin-bottom:22px;
+      font-size: 27px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 22px;
     }
 
     .info {
-      font-size:18px;
-      line-height:1.45;
-      color:#d9faff;
-      opacity:.92;
-      margin-bottom:30px;
+      font-size: 18px;
+      line-height: 1.45;
+      color: #d9faff;
+      opacity: .92;
+      margin-bottom: 30px;
     }
 
     .spinner {
-      margin:0 auto;
-      width:42px;
-      height:42px;
-      border-radius:50%;
-      border:5px solid rgba(255,255,255,.25);
-      border-top:5px solid #00eaff;
-      animation:spin 1s linear infinite;
+      margin: 0 auto;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 5px solid rgba(255,255,255,.25);
+      border-top: 5px solid #00eaff;
+      animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
-      100% { transform:rotate(360deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .last {
-      margin-top:26px;
-      font-size:14px;
-      line-height:1.5;
-      color:#cfefff;
-      opacity:.8;
+      margin-top: 26px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #cfefff;
+      opacity: .8;
     }
 
     #debugPanel {
-      position:fixed;
-      right:14px;
-      bottom:14px;
-      z-index:1000000;
-      display:none;
-      gap:8px;
-      background:rgba(0,0,0,.55);
-      padding:10px;
-      border-radius:12px;
-      border:1px solid rgba(0,234,255,.4);
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 1000000;
+      display: none;
+      gap: 8px;
+      background: rgba(0,0,0,.55);
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,234,255,.4);
     }
 
     #debugPanel button {
-      border:none;
-      border-radius:9px;
-      padding:9px 12px;
-      font-weight:800;
-      cursor:pointer;
-      background:#00eaff;
-      color:#06122b;
+      border: none;
+      border-radius: 9px;
+      padding: 9px 12px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #00eaff;
+      color: #06122b;
     }
   </style>
 </head>
@@ -136,7 +136,8 @@
 
   <div id="offlineFallback">
     <div class="offlineCard">
-      <img class="logo"
+      <img
+        class="logo"
         src="https://drive.google.com/thumbnail?id=11OnUfELMcLBj_VPiqKXqu1nIAZHXg_Pb&sz=w400"
         alt="Feuerwehr St. Pölten Stadt">
 
@@ -156,7 +157,9 @@
 
   <script>
     const APP_URL = "https://script.google.com/a/macros/feuerwehr-stpoelten.at/s/AKfycbycKW54MsrXZAgrM4h4dqOnbcbuyw-icOU2WT94aS7a0TOf6Y-nkUfhpDrE3UHxThKR/exec";
-    const GLOBAL_STATUS_URL = "https://michaelmejtsky.github.io/FFSTP-Status/status.json";
+
+    // Zentrale Statusdatei über raw.githubusercontent.com
+    const GLOBAL_STATUS_URL = "https://raw.githubusercontent.com/michaelmejtsky/FFSTP-Status/main/status.json";
 
     const frame = document.getElementById("infoscreenFrame");
     const offline = document.getElementById("offlineFallback");
@@ -169,12 +172,12 @@
 
     function formatDateTime(date) {
       return date.toLocaleString("de-AT", {
-        day:"2-digit",
-        month:"2-digit",
-        year:"numeric",
-        hour:"2-digit",
-        minute:"2-digit",
-        second:"2-digit"
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
       }) + " Uhr";
     }
 
@@ -223,9 +226,7 @@
 
     async function checkGlobalFallbackStatus() {
       try {
-        const url = GLOBAL_STATUS_URL + "?nocache=" + Date.now();
-
-        const response = await fetch(url, {
+        const response = await fetch(GLOBAL_STATUS_URL + "?nocache=" + Date.now(), {
           cache: "no-store"
         });
 
